@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
-    List<Vehicle> findByBrandInAndFabricationYearGreaterThanEqual(List<String> attr0, int attr1);
+public interface VehicleRepository extends JpaRepository<Vehicle,Long> {
+    List<Vehicle> findByBrandInAndFabricationYearGreaterThanEqual(List<String> brands, Integer year);
+    boolean existsByLicensePlate(String licensePlate);
+
 }

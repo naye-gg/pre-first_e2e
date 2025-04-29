@@ -1,60 +1,97 @@
 package org.e2e.labe2e01.passenger.application;
 
-import org.e2e.labe2e01.userLocations.domain.UserLocation;
 import lombok.RequiredArgsConstructor;
 import org.e2e.labe2e01.coordinate.domain.Coordinate;
 import org.e2e.labe2e01.passenger.domain.Passenger;
+import org.e2e.labe2e01.passenger.domain.PassengerService;
 import org.e2e.labe2e01.passenger.infrastructure.PassengerRepository;
+import org.e2e.labe2e01.user.domain.Role;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/passenger")
 @RequiredArgsConstructor
 public class PassengerController {
+    private final PassengerService passengerService;
     private final PassengerRepository passengerRepository;
 
-    @GetMapping("/{id}")
+    @GetMapping ("/{id}")
     public ResponseEntity<Passenger> getPassengerById(@PathVariable Long id) {
-        return ResponseEntity.ok(passengerRepository.findById(id).orElse(null));
+        Passenger passenger =  passengerRepository.findById(id).orElse(null);
+        if (passenger==null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(passenger);
     }
 
+    /*
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Passenger savePassenger(@RequestBody Passenger passenger) {
+        passenger.setRole(Role.PASSENGER); // Asignar rol automáticamente
+        return passengerService.savePassenger(passenger);
+    }
+
+     */
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePassengerById(@PathVariable Long id) {
-        passengerRepository.deleteById(id);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity deletePassengerById(@PathVariable Long id) {
+        Passenger passenger = passengerRepository.findById(id).orElse(null);
+        if (passenger == null) {
+            return ResponseEntity.notFound().build();
+        }
+        passengerRepository.delete(passenger);
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Passenger> updatePassenger(
             @PathVariable Long id,
-            @RequestParam String description,
-            @RequestBody Coordinate newCoordinate) {
-
-        Passenger passenger = passengerRepository.findById(id).orElse(null);
-        passenger.setDescription(description);
-        passenger.setCoordinate(newCoordinate);
-        return ResponseEntity.ok(passengerRepository.save(passenger));
+            @RequestBody Passenger passenger) {
+        Passenger updatedPassenger = passengerService.updatePassenger(id, passenger);
+        return ResponseEntity.ok(updatedPassenger);
     }
 
     @GetMapping("/{id}/places")
     public ResponseEntity<List<Coordinate>> getPassengerPlaces(@PathVariable Long id) {
-        return ResponseEntity.ok(passengerRepository.findById(id)
-                .map(Passenger::getPlacesList)
-                .orElse(null));
+        Passenger passenger = passengerRepository.findById(id).orElse(null);
+        if (passenger == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(passenger.getPlacesList());
     }
 
+    /*
+    @PostMapping("/{id}/places")
+    public ResponseEntity<Passenger> addPlace(
+            @PathVariable Long id,
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestParam String description) {
+        Passenger passenger = passengerService.addPlace(id, latitude, longitude, description);
+        return ResponseEntity.ok(passenger);
+    }
+
+     */
+
     @DeleteMapping("/{id}/places/{coordinateId}")
-    public ResponseEntity<Void> deletePassengerPlace(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePlace(
             @PathVariable Long id,
             @PathVariable Long coordinateId) {
-
-        Passenger passenger = passengerRepository.findById(id).orElseThrow();
-        passenger.removePlace(coordinateId);
-        passengerRepository.save(passenger);
-
-        return ResponseEntity.noContent().build();
+        passengerService.removePlace(id, coordinateId);
+    }
+    @PatchMapping("/{id}")
+    public ResponseEntity<Passenger> patchPassenger(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+        Passenger updatedPassenger = passengerService.patchPassenger(id, updates);
+        return ResponseEntity.ok(updatedPassenger);
     }
 }

@@ -16,45 +16,54 @@ import java.util.List;
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
 @RequiredArgsConstructor
+
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column (name = "first_name", nullable = false)
-    private String firstName;
+    @JoinColumn (name = "average_rating", nullable = false)
+    private double averageRating = 0.0;
 
-    @Column (name = "last_name", nullable = false)
-    private String lastName;
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column (nullable = false)
-    private String password;
-
-    @Column (name = "phone_number", nullable = false)
-    private String phoneNumber;
-
-    @Column (name = "avg_rating")
-    private double avgRating = 0.0;
-
-    @Column (nullable = false)
+    @JoinColumn (nullable = false)
     private Role role;
 
+    @JoinColumn ( nullable = false)
     private Integer trips = 0;
+
+    @JoinColumn (name = "created_at", nullable = false)
+    private ZonedDateTime CreatedAt;
+
+    @JoinColumn (name = "updated_at")
+    private ZonedDateTime UpdatedAt;
+
+    @Column (unique = true)
+    private String email;
+
+    @JoinColumn (name = "first_name", nullable = false)
+    private String FirstName;
+
+    @JoinColumn (name = "last_name", nullable = false)
+    private String LastName;
+
+    @JoinColumn (name = "password", nullable = false)
+    private String Password;
+
+    @Column (unique = true)
+    @JoinColumn (name = "phone_number", nullable = false)
+    private String PhoneNumber;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "coordinate_id")
     private Coordinate coordinate;
 
-    @Column (name = "created_at", nullable = false)
-    private ZonedDateTime createdAt;
 
-    @Column (name = "updated_at")
-    private ZonedDateTime updatedAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviewsAsAuthor = new ArrayList<>();
+
+    @OneToMany(mappedBy = "target", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviewsAsTarget = new ArrayList<>();
 
 }

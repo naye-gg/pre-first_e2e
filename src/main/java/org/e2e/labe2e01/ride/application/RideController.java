@@ -2,24 +2,28 @@ package org.e2e.labe2e01.ride.application;
 
 
 import lombok.RequiredArgsConstructor;
+import org.e2e.labe2e01.driver.domain.Driver;
 import org.e2e.labe2e01.ride.domain.Ride;
 import org.e2e.labe2e01.ride.domain.Status;
 import org.e2e.labe2e01.ride.infrastructure.RideRepository;
+import org.e2e.labe2e01.driver.infrastructure.DriverRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/ride")
 @RequiredArgsConstructor
 public class RideController {
     private final RideRepository rideRepository;
+    private final DriverRepository driverRepository;
 
     @PostMapping
     public ResponseEntity<Ride> createRide(@RequestBody Ride ride) {
-        return ResponseEntity.status(201).body(rideRepository.save(ride));
+        Ride savedRide = rideRepository.save(ride);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedRide);
     }
 
     @PatchMapping("/{rideId}/assign/{driverId}")
@@ -27,14 +31,27 @@ public class RideController {
             @PathVariable Long rideId,
             @PathVariable Long driverId) {
 
-        Ride ride = rideRepository.findById(rideId).orElse(new Ride());
+        Ride ride = rideRepository.findById(rideId).orElse(null);
+        Driver driver = driverRepository.findById(driverId).orElse(null);
+
+        if (ride == null || driver == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        ride.setDriver(driver);
         ride.setStatus(Status.ACCEPTED);
-        return ResponseEntity.ok(rideRepository.save(ride));
+        Ride updatedRide = rideRepository.save(ride);
+
+        return ResponseEntity.ok(updatedRide);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRide(@PathVariable Long id) {
-        rideRepository.deleteById(id);
+        Ride ride = rideRepository.findById(id).orElse(null);
+        if (ride == null) {
+            return ResponseEntity.notFound().build();
+        }
+        rideRepository.delete(ride);
         return ResponseEntity.noContent().build();
     }
 
@@ -44,14 +61,22 @@ public class RideController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        return ResponseEntity.ok(rideRepository.findByPassengerId(
-                passengerId, PageRequest.of(page, size)));
+        Page<Ride> rides = rideRepository.findByPassengerId(passengerId, PageRequest.of(page, size));
+
+        return ResponseEntity.ok(rides);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Ride> cancelRide(@PathVariable Long id) {
-        Ride ride = rideRepository.findById(id).orElse(new Ride());
+        Ride ride = rideRepository.findById(id).orElse(null);
+        if (ride == null) {
+            return ResponseEntity.notFound().build();
+        }
+
         ride.setStatus(Status.CANCELED);
-        return ResponseEntity.ok(rideRepository.save(ride));
+        Ride updatedRide = rideRepository.save(ride);
+
+        return ResponseEntity.ok(updatedRide);
     }
+
 }

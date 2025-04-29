@@ -2,77 +2,70 @@ package org.e2e.labe2e01.passenger.domain;
 
 import lombok.RequiredArgsConstructor;
 import org.e2e.labe2e01.coordinate.domain.Coordinate;
-import org.e2e.labe2e01.passenger.domain.Passenger;
 import org.e2e.labe2e01.passenger.infrastructure.PassengerRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.Map;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class PassengerService {
-
     private final PassengerRepository passengerRepository;
 
-    // Obtener un pasajero por ID
-    public Optional<Passenger> getPassenger(Long id) {
-        return passengerRepository.findById(id);
+    public Passenger getPassengerById(Long id) {
+        return passengerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Passenger not found"));
     }
 
-    // Eliminar un pasajero por ID
-    public boolean deletePassenger(Long id) {
-        if (passengerRepository.existsById(id)) {
-            passengerRepository.deleteById(id);
-            return true;
+    public Passenger savePassenger(Passenger passenger) {
+        return passengerRepository.save(passenger);
+    }
+
+    public void deletePassenger(Long id) {
+        passengerRepository.deleteById(id);
+    }
+
+    public Passenger updatePassenger(Long id, Passenger passengerDetails) {
+        Passenger passenger = getPassengerById(id);
+        // Actualizar campos permitidos
+        passenger.setFirstName(passengerDetails.getFirstName());
+        passenger.setLastName(passengerDetails.getLastName());
+        passenger.setEmail(passengerDetails.getEmail());
+        passenger.setPhoneNumber(passengerDetails.getPhoneNumber());
+        return passengerRepository.save(passenger);
+    }
+
+    public List<Coordinate> getPlacesList(Long passengerId) {
+        Passenger passenger = getPassengerById(passengerId);
+        return passenger.getPlacesList();
+    }
+
+    public Passenger addPlace(Long passengerId, double latitude, double longitude, String description) {
+        Passenger passenger = getPassengerById(passengerId);
+        Coordinate coordinate = new Coordinate(latitude, longitude);
+        passenger.addPlace(coordinate, description);
+        return passengerRepository.save(passenger);
+    }
+
+    public void removePlace(Long passengerId, Long coordinateId) {
+        Passenger passenger = getPassengerById(passengerId);
+        passenger.removePlace(coordinateId);
+        passengerRepository.save(passenger);
+    }
+
+    public Passenger patchPassenger(Long id, Map<String, Object> updates) {
+        Passenger passenger = getPassengerById(id);
+
+        // Actualiza solo los campos proporcionados
+        if (updates.containsKey("firstName")) {
+            passenger.setFirstName((String) updates.get("firstName"));
         }
-        return false;
-    }
+        if (updates.containsKey("lastName")) {
+            passenger.setLastName((String) updates.get("lastName"));
+        }
+        // ... otros campos
 
-    // Actualizar la descripción y/o coordenada de un pasajero
-    public Optional<Passenger> updatePassenger(Long id, String description, Coordinate newCoordinate) {
-        return passengerRepository.findById(id)
-                .map(passenger -> {
-                    if (description != null) {
-                        passenger.setDescription(description);
-                    }
-                    if (newCoordinate != null) {
-                        Coordinate existingCoordinate = passenger.getCoordinate();
-                        if (existingCoordinate == null) {
-                            passenger.setCoordinate(newCoordinate);
-                        } else {
-                            if (Objects.nonNull(newCoordinate.getLatitude())) {
-                                existingCoordinate.setLatitude(newCoordinate.getLatitude());
-                            }
-                            if (Objects.nonNull(newCoordinate.getLongitude())) {
-                                existingCoordinate.setLongitude(newCoordinate.getLongitude());
-                            }
-                        }
-                    }
-                    return passengerRepository.save(passenger);
-                });
-    }
-
-    // Obtener la lista de lugares favoritos de un pasajero
-    public Optional<List<Coordinate>> getPassengerPlaces(Long id) {
-        return passengerRepository.findById(id)
-                .map(Passenger::getPlacesList);
-    }
-
-    // Eliminar un lugar favorito de un pasajero
-    public boolean deletePassengerPlace(Long passengerId, Long coordinateId) {
-        return passengerRepository.findById(passengerId)
-                .map(passenger -> {
-                    List<Coordinate> places = passenger.getPlacesList();
-                    boolean removed = places.removeIf(c -> c.getId().equals(coordinateId));
-                    if (removed) {
-                        passengerRepository.save(passenger);
-                    }
-                    return removed;
-                })
-                .orElse(false);
+        return passengerRepository.save(passenger);
     }
 }

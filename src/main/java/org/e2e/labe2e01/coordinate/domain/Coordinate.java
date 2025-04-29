@@ -9,10 +9,8 @@ import org.e2e.labe2e01.userLocations.domain.UserLocation;
 
 import java.util.ArrayList;
 import java.util.List;
-
-@Data
 @Entity
-@Table(name = "coordinate")
+@Data
 @NoArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Coordinate {
@@ -20,16 +18,11 @@ public class Coordinate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private double latitude;
-
-    @Column(nullable = false)
     private double longitude;
 
+    @OneToMany(mappedBy = "coordinate", orphanRemoval = true)
 
-    @OneToMany(mappedBy = "coordinate",
-            orphanRemoval = true
-    )
     private List<UserLocation> passengers = new ArrayList<>();
 
     public Coordinate(Double latitude, Double longitude) {
@@ -37,5 +30,3 @@ public class Coordinate {
         this.longitude = longitude;
     }
 }
-
-

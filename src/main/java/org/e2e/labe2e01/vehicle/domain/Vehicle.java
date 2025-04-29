@@ -9,26 +9,34 @@ import org.e2e.labe2e01.driver.domain.Driver;
 @Data
 @Entity
 @NoArgsConstructor
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"licensePlate"})
+})
 public class Vehicle {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Integer capacity;
+    // @JoinColumn(nullable = false)
+    private int capacity;
 
-    @Column(name = "fabrication_year", nullable = false)
-    private Integer fabricationYear;
+    // @JoinColumn(name = "fabrication_year", nullable = false)
+    private int fabricationYear;
 
-    @Column(nullable = false)
+    // @JoinColumn(nullable = false)
     private String brand;
 
-    @Column(name = "license_plate", nullable = false, unique = true)
+    // @JoinColumn(name = "license_plate", nullable = false)
+    @Column(unique = true)
     private String licensePlate;
 
-    @Column(nullable = false)
+    //@JoinColumn(nullable = false)
     private String model;
 
-    @OneToOne(mappedBy = "vehicle")
+    /*@OneToOne
+    @JoinColumn(name = "driver_id")
+    @JsonBackReference
     private Driver driver;
+
+     */
 }
