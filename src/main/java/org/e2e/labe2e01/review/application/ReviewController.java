@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/review")
 @RequiredArgsConstructor
@@ -17,18 +16,12 @@ public class ReviewController {
 
     @PostMapping
     public ResponseEntity<Review> addReview(@RequestBody Review review) {
-        Review savedReview = reviewRepository.save(review);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedReview);
+        return ResponseEntity.ok(reviewRepository.save(review));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
-        Review review = reviewRepository.findById(id).orElse(null);
-        if (review == null) {
-            return ResponseEntity.notFound().build();
-        }
-        reviewRepository.delete(review);
+        reviewRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-
 }

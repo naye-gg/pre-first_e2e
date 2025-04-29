@@ -11,17 +11,12 @@ import org.e2e.labe2e01.vehicle.domain.Vehicle;
 @Data
 @NoArgsConstructor
 public class Driver extends User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", nullable = false)
     private Category category;
 
-
     @OneToOne(mappedBy = "driver", cascade = CascadeType.ALL)
-    @JoinColumn(name="vehicle_id")
-    @JsonManagedReference
+    @JoinColumn(name = "vehicle_id", unique = true, nullable = false)
     private Vehicle vehicle;
-
 }

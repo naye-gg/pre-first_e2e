@@ -1,5 +1,6 @@
 package org.e2e.labe2e01.passenger.application;
 
+import org.e2e.labe2e01.userLocations.domain.UserLocation;
 import lombok.RequiredArgsConstructor;
 import org.e2e.labe2e01.coordinate.domain.Coordinate;
 import org.e2e.labe2e01.passenger.domain.Passenger;
@@ -8,68 +9,41 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
-@RequestMapping("/passenger")
 @RestController
+@RequestMapping("/passenger")
 @RequiredArgsConstructor
 public class PassengerController {
     private final PassengerRepository passengerRepository;
 
-    @GetMapping ("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Passenger> getPassengerById(@PathVariable Long id) {
-        Passenger passenger =  passengerRepository.findById(id).orElse(null);
-        if (passenger==null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(passenger);
+        return ResponseEntity.ok(passengerRepository.findById(id).orElse(null));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deletePassengerById(@PathVariable Long id) {
-        Passenger passenger = passengerRepository.findById(id).orElse(null);
-        if (passenger == null) {
-            return ResponseEntity.notFound().build();
-        }
-        passengerRepository.delete(passenger);
+    public ResponseEntity<Void> deletePassengerById(@PathVariable Long id) {
+        passengerRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity updatePassenger(@PathVariable Long id, @RequestParam String description, @RequestBody Coordinate new_coordinate) {
+    public ResponseEntity<Passenger> updatePassenger(
+            @PathVariable Long id,
+            @RequestParam String description,
+            @RequestBody Coordinate newCoordinate) {
+
         Passenger passenger = passengerRepository.findById(id).orElse(null);
-        if (passenger == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        if (description != null) {
-            passenger.setDescription(description);
-        }
-
-        Coordinate existingCoordinate = passenger.getCoordinate();
-        if (existingCoordinate == null) {
-            passenger.setCoordinate(new_coordinate);
-        } else{
-            if (Objects.nonNull(new_coordinate.getLatitude())) {
-                existingCoordinate.setLatitude(new_coordinate.getLatitude());
-            }
-            if (Objects.nonNull(new_coordinate.getLongitude())) {
-                existingCoordinate.setLongitude(new_coordinate.getLongitude());
-            }
-        }
-
-        Passenger updatedPassenger = passengerRepository.save(passenger);
-        return ResponseEntity.ok(updatedPassenger);
+        passenger.setDescription(description);
+        passenger.setCoordinate(newCoordinate);
+        return ResponseEntity.ok(passengerRepository.save(passenger));
     }
-
 
     @GetMapping("/{id}/places")
     public ResponseEntity<List<Coordinate>> getPassengerPlaces(@PathVariable Long id) {
-        Passenger passenger = passengerRepository.findById(id).orElse(null);
-        if (passenger == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(passenger.getPlacesList());
+        return ResponseEntity.ok(passengerRepository.findById(id)
+                .map(Passenger::getPlacesList)
+                .orElse(null));
     }
 
     @DeleteMapping("/{id}/places/{coordinateId}")
@@ -77,20 +51,10 @@ public class PassengerController {
             @PathVariable Long id,
             @PathVariable Long coordinateId) {
 
-        Passenger passenger = passengerRepository.findById(id).orElse(null);
-        if (passenger == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        List<Coordinate> places = passenger.getPlacesList();
-        boolean removed = places.removeIf(c -> c.getId().equals(coordinateId));
-
-        if (!removed) {
-            return ResponseEntity.notFound().build();
-        }
-
+        Passenger passenger = passengerRepository.findById(id).orElseThrow();
+        passenger.removePlace(coordinateId);
         passengerRepository.save(passenger);
+
         return ResponseEntity.noContent().build();
     }
 }
-

@@ -12,16 +12,20 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(name = "coordinate")
 @NoArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Coordinate {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private double latitude;
+
+    @Column(nullable = false)
     private double longitude;
+
 
     @OneToMany(mappedBy = "coordinate",
             orphanRemoval = true

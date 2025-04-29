@@ -16,48 +16,43 @@ import java.util.List;
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
 @RequiredArgsConstructor
-
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn (name = "average_rating", nullable = false)
-    private double averageRating = 0.0;
+    @Column (name = "first_name", nullable = false)
+    private String firstName;
 
-    @JoinColumn (nullable = false)
-    private Role role;
+    @Column (name = "last_name", nullable = false)
+    private String lastName;
 
-    @JoinColumn ( nullable = false)
-    private Integer trips = 0;
-
-    @JoinColumn (name = "created_at", nullable = false)
-    private ZonedDateTime CreatedAt;
-
-    @JoinColumn (name = "updated_at")
-    private ZonedDateTime UpdatedAt;
-
-    @Column (unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @JoinColumn (name = "first_name", nullable = false)
-    private String FirstName;
+    @Column (nullable = false)
+    private String password;
 
-    @JoinColumn (name = "last_name", nullable = false)
-    private String LastName;
+    @Column (name = "phone_number", nullable = false)
+    private String phoneNumber;
 
-    @JoinColumn (name = "password", nullable = false)
-    private String Password;
+    @Column (name = "avg_rating")
+    private double avgRating = 0.0;
 
-    @Column (unique = true)
-    @JoinColumn (name = "phone_number", nullable = false)
-    private String PhoneNumber;
+    @Column (nullable = false)
+    private Role role;
+
+    private Integer trips = 0;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "coordinate_id")
     private Coordinate coordinate;
 
+    @Column (name = "created_at", nullable = false)
+    private ZonedDateTime createdAt;
 
+    @Column (name = "updated_at")
+    private ZonedDateTime updatedAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();

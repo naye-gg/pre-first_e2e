@@ -14,24 +14,21 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(nullable = false)
+    @Column(nullable = false)
     private Integer capacity;
 
-    @JoinColumn(name = "fabrication_year", nullable = false)
-    private Integer FabricationYear;
+    @Column(name = "fabrication_year", nullable = false)
+    private Integer fabricationYear;
 
-    @JoinColumn(nullable = false)
+    @Column(nullable = false)
     private String brand;
 
-    @JoinColumn(name = "license_plate", nullable = false)
-    @Column(unique = true)
-    private String LicensePlate;
+    @Column(name = "license_plate", nullable = false, unique = true)
+    private String licensePlate;
 
-    @JoinColumn(nullable = false)
-    private String Model;
+    @Column(nullable = false)
+    private String model;
 
-    @OneToOne
-    @JoinColumn(name = "driver_id")
-    @JsonBackReference
+    @OneToOne(mappedBy = "vehicle")
     private Driver driver;
 }

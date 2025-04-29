@@ -49,13 +49,14 @@ public class Ride {
     @JoinColumn(name = "passenger_id", nullable = false)
     private Passenger Passenger;
 
-    @JoinColumn(name = "destination_name", nullable = false)
+    @Column(name = "destination_name", nullable = false)
     private String DestinationName;
 
-    @JoinColumn(name = "origin_name", nullable = false)
+    @Column(name = "origin_name", nullable = false)
     private String OriginName;
 
 
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
+
 }
