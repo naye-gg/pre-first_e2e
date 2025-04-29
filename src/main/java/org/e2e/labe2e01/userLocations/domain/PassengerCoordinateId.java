@@ -15,10 +15,8 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PassengerCoordinateId implements Serializable {
-
-    public Long passengerId;
-    public Long coordinateId;
-
+    private Long passengerId;
+    private Long coordinateId;
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -35,5 +33,7 @@ public class PassengerCoordinateId implements Serializable {
     public int hashCode() {
         return Objects.hash(passengerId, coordinateId);
     }
+
+
 }
 

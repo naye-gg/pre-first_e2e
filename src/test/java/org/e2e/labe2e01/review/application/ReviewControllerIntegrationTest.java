@@ -127,7 +127,7 @@ public class ReviewControllerIntegrationTest {
         mockMvc.perform(post("/review")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(review)))
-                .andExpect(status().isCreated());
+                    .andExpect(status().isCreated());
 
         Review createdReview = reviewRepository.findAll().get(0);
         Review savedReview = reviewRepository.findAll().get(0);

@@ -11,22 +11,26 @@ import org.e2e.labe2e01.passenger.domain.Passenger;
 @Data
 @Entity
 @NoArgsConstructor
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class UserLocation {
+
     @EmbeddedId
     private PassengerCoordinateId id;
 
-    @JoinColumn(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("passengerId")  // Cambiado a camelCase
+    @MapsId("passengerId")
+    @JoinColumn(name = "passenger_id", nullable = false)
     private Passenger passenger;
 
-    @JoinColumn(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("coordinateId") // Cambiado a camelCase
+    @MapsId("coordinateId")
+    @JoinColumn(name = "coordinate_id", nullable = false)
     private Coordinate coordinate;
 
-    @JoinColumn(nullable = false)
+    @Column(length = 500) // Aumentar longitud para descripciones largas
     private String description;
 
     public UserLocation(Passenger passenger, Coordinate coordinate, String description) {
@@ -34,5 +38,15 @@ public class UserLocation {
         this.coordinate = coordinate;
         this.description = description;
         this.id = new PassengerCoordinateId(passenger.getId(), coordinate.getId());
+    }
+
+    // Método para sincronizar ambas partes de la relación
+    public void synchronizeRelations() {
+        if (this.passenger != null) {
+            this.passenger.getPlaces().add(this);
+        }
+        if (this.coordinate != null) {
+            this.coordinate.getPassengers().add(this);
+        }
     }
 }

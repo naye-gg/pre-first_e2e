@@ -91,7 +91,8 @@ public class DriverControllerIntegrationTest {
 
         mockMvc.perform(post("/driver")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(currentDriver))).andExpect(status().isCreated());
+                        .content(objectMapper.writeValueAsString(currentDriver)))
+                .andExpect(status().isCreated());
 
         List<Driver> drivers = driverRepository.findAll();
         Assertions.assertEquals(1, drivers.size());
