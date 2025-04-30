@@ -14,24 +14,29 @@ import org.e2e.labe2e01.user.domain.User;
 
 @Entity
 @Data
-@NoArgsConstructor
+@Table(name = "review", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"ride_id", "author_id"})
+})
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "ride_id")
-    private Ride ride;
+    @Column(nullable = false)
+    private Integer rating;
 
     @ManyToOne
-    @JoinColumn(name = "author_id")
+    @JoinColumn(nullable = false)
     private User author;
 
     @ManyToOne
-    @JoinColumn(name = "target_id")
+    @JoinColumn(nullable = false)
     private User target;
 
-    private Integer rating;
+    @ManyToOne
+    @JoinColumn(nullable = false, unique = true)
+    private Ride ride;
+
+    @Column(nullable = false)
     private String comment;
 }
